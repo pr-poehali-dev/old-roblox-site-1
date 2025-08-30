@@ -19,6 +19,10 @@ export default function Index() {
     title: '',
     description: ''
   });
+  const [currentUser, setCurrentUser] = useState({
+    username: '',
+    email: ''
+  });
   const [registerForm, setRegisterForm] = useState({
     username: '',
     email: '',
@@ -107,7 +111,7 @@ export default function Index() {
               </nav>
             </div>
             <div className="flex items-center gap-3">
-              <a href="https://github.com/roblox/roblox-studio" target="_blank" rel="noopener noreferrer">
+              <a href="https://bitl.itch.io/novetus" target="_blank" rel="noopener noreferrer">
                 <Button variant="outline" size="sm" className="bg-white border-roblox-blue text-roblox-blue hover:bg-roblox-blue/10">
                   <Icon name="Download" size={16} className="mr-2" />
                   Скачать
@@ -170,8 +174,14 @@ export default function Index() {
                           <Button 
                             className="flex-1 bg-roblox-blue hover:bg-roblox-blue/90"
                             onClick={() => {
-                              setIsLoggedIn(true);
-                              setShowRegister(false);
+                              if (registerForm.username && registerForm.email) {
+                                setCurrentUser({
+                                  username: registerForm.username,
+                                  email: registerForm.email
+                                });
+                                setIsLoggedIn(true);
+                                setShowRegister(false);
+                              }
                             }}
                           >
                             Создать аккаунт
@@ -193,7 +203,13 @@ export default function Index() {
                   <Button 
                     size="sm" 
                     className="bg-roblox-green hover:bg-roblox-green/90"
-                    onClick={() => setIsLoggedIn(true)}
+                    onClick={() => {
+                      setCurrentUser({
+                        username: 'Гость',
+                        email: 'guest@blox2009.com'
+                      });
+                      setIsLoggedIn(true);
+                    }}
                   >
                     <Icon name="LogIn" size={16} className="mr-2" />
                     Войти
@@ -209,7 +225,10 @@ export default function Index() {
                     variant="outline" 
                     size="sm" 
                     className="bg-white border-gray-300"
-                    onClick={() => setIsLoggedIn(false)}
+                    onClick={() => {
+                      setIsLoggedIn(false);
+                      setCurrentUser({ username: '', email: '' });
+                    }}
                   >
                     <Icon name="LogOut" size={16} className="mr-2" />
                     Выйти
@@ -309,7 +328,7 @@ export default function Index() {
           <TabsContent value="главная" className="space-y-6">
             <div className="text-center space-y-4 mb-8">
               <h2 className="text-4xl font-bold text-roblox-dark">
-                Добро пожаловать в BLOX2009!
+                {isLoggedIn ? `Привет, ${currentUser.username}!` : 'Добро пожаловать в BLOX2009!'}
               </h2>
               <p className="text-xl text-gray-600">
                 {isLoggedIn ? 'Играй, создавай, исследуй безграничные миры' : 'Зарегистрируйся и начни своё приключение!'}
@@ -464,7 +483,16 @@ export default function Index() {
                     <Icon name="Lock" size={48} className="text-gray-400 mx-auto mb-4" />
                     <h3 className="text-xl font-semibold mb-2">Войдите в аккаунт</h3>
                     <p className="text-gray-600 mb-4">Для создания игр необходимо войти в аккаунт</p>
-                    <Button onClick={() => setIsLoggedIn(true)} className="bg-roblox-blue hover:bg-roblox-blue/90">
+                    <Button 
+                      onClick={() => {
+                        setCurrentUser({
+                          username: 'Гость',
+                          email: 'guest@blox2009.com'
+                        });
+                        setIsLoggedIn(true);
+                      }} 
+                      className="bg-roblox-blue hover:bg-roblox-blue/90"
+                    >
                       Войти
                     </Button>
                   </CardContent>
@@ -593,10 +621,12 @@ export default function Index() {
             <Card className="bg-white/95 backdrop-blur-sm max-w-2xl mx-auto">
               <CardHeader className="text-center">
                 <div className="w-24 h-24 bg-gradient-to-br from-roblox-blue to-roblox-purple rounded-full mx-auto mb-4 flex items-center justify-center text-white text-2xl font-bold">
-                  И
+                  {currentUser.username ? currentUser.username[0].toUpperCase() : 'И'}
                 </div>
-                <CardTitle className="text-2xl">Игрок123</CardTitle>
-                <p className="text-muted-foreground">Участник с 2024 года</p>
+                <CardTitle className="text-2xl">{currentUser.username || 'Игрок123'}</CardTitle>
+                <p className="text-muted-foreground">
+                  {currentUser.email || 'guest@blox2009.com'} • Участник с 2024 года
+                </p>
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="grid md:grid-cols-3 gap-4 text-center">
