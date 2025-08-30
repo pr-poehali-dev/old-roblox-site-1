@@ -66,9 +66,9 @@ export default function Index() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-roblox-blue via-roblox-purple to-roblox-green">
+    <div className="min-h-screen bg-white">
       {/* Header */}
-      <header className="bg-white/90 backdrop-blur-sm border-b border-white/20 sticky top-0 z-50">
+      <header className="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm">
         <div className="container mx-auto px-4 py-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
@@ -90,6 +90,10 @@ export default function Index() {
               </nav>
             </div>
             <div className="flex items-center gap-3">
+              <Button variant="outline" size="sm" className="bg-white border-roblox-blue text-roblox-blue hover:bg-roblox-blue/10">
+                <Icon name="Download" size={16} className="mr-2" />
+                Скачать
+              </Button>
               {!isLoggedIn ? (
                 <>
                   <Dialog open={showRegister} onOpenChange={setShowRegister}>
@@ -285,10 +289,10 @@ export default function Index() {
           {/* Home Tab */}
           <TabsContent value="главная" className="space-y-6">
             <div className="text-center space-y-4 mb-8">
-              <h2 className="text-4xl font-bold text-white drop-shadow-lg">
+              <h2 className="text-4xl font-bold text-roblox-dark">
                 Добро пожаловать в BLOX2009!
               </h2>
-              <p className="text-xl text-white/90 drop-shadow">
+              <p className="text-xl text-gray-600">
                 {isLoggedIn ? 'Играй, создавай, исследуй безграничные миры' : 'Зарегистрируйся и начни своё приключение!'}
               </p>
             </div>
@@ -379,13 +383,13 @@ export default function Index() {
           {/* Games Tab */}
           <TabsContent value="игры" className="space-y-6">
             <div className="flex justify-between items-center">
-              <h2 className="text-3xl font-bold text-white drop-shadow-lg">Игры</h2>
+              <h2 className="text-3xl font-bold text-roblox-dark">Игры</h2>
               <div className="flex gap-2">
-                <Button variant="outline" className="bg-white/90">
+                <Button variant="outline" className="bg-white border-gray-300">
                   <Icon name="Filter" size={16} className="mr-2" />
                   Фильтр
                 </Button>
-                <Button variant="outline" className="bg-white/90">
+                <Button variant="outline" className="bg-white border-gray-300">
                   <Icon name="Search" size={16} className="mr-2" />
                   Поиск
                 </Button>
@@ -426,8 +430,8 @@ export default function Index() {
           {/* Other tabs */}
           <TabsContent value="каталог" className="space-y-6">
             <div className="text-center">
-              <h2 className="text-3xl font-bold text-white drop-shadow-lg">Каталог</h2>
-              <p className="text-white/90 mt-2">Кастомизируй своего персонажа</p>
+              <h2 className="text-3xl font-bold text-roblox-dark">Каталог</h2>
+              <p className="text-gray-600 mt-2">Кастомизируй своего персонажа</p>
             </div>
             
             <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -453,7 +457,7 @@ export default function Index() {
           </TabsContent>
 
           <TabsContent value="друзья" className="space-y-6">
-            <h2 className="text-3xl font-bold text-white drop-shadow-lg">Друзья</h2>
+            <h2 className="text-3xl font-bold text-roblox-dark">Друзья</h2>
             <div className="grid md:grid-cols-1 lg:grid-cols-2 gap-6">
               {friends.map((friend, index) => (
                 <Card key={index} className="bg-white/95 backdrop-blur-sm">
@@ -514,7 +518,7 @@ export default function Index() {
           </TabsContent>
 
           <TabsContent value="форум" className="space-y-6">
-            <h2 className="text-3xl font-bold text-white drop-shadow-lg">Форум</h2>
+            <h2 className="text-3xl font-bold text-roblox-dark">Форум</h2>
             <div className="grid gap-4">
               {[
                 "Обновления и новости",
