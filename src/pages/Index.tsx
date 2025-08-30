@@ -6,6 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import Icon from '@/components/ui/icon';
 
 export default function Index() {
@@ -15,9 +16,16 @@ export default function Index() {
   const [onlineCount, setOnlineCount] = useState(0);
   const [showCreateGame, setShowCreateGame] = useState(false);
   const [userGames, setUserGames] = useState([]);
+  const [forumPosts, setForumPosts] = useState([]);
+  const [newPostForm, setNewPostForm] = useState({
+    title: '',
+    content: ''
+  });
   const [newGameForm, setNewGameForm] = useState({
     title: '',
-    description: ''
+    description: '',
+    port: '',
+    imageUrl: ''
   });
   const [currentUser, setCurrentUser] = useState({
     username: '',
@@ -29,54 +37,58 @@ export default function Index() {
     password: '',
     confirmPassword: ''
   });
-  const [avatarConfig, setAvatarConfig] = useState({
-    skinColor: '#FDB94E',
-    shirtColor: '#00A2FF',
-    pantsColor: '#2ECC40',
-    hatType: 'cap'
-  });
 
-  // Реальный онлайн счетчик
+
+  // Реальный онлайн счетчик и сохранение
   useEffect(() => {
+    // Загрузка данных из localStorage
+    const savedUser = localStorage.getItem('blox2009_user');
+    const savedGames = localStorage.getItem('blox2009_games');
+    const savedPosts = localStorage.getItem('blox2009_posts');
+    
+    if (savedUser) {
+      const user = JSON.parse(savedUser);
+      setCurrentUser(user);
+      setIsLoggedIn(true);
+    }
+    
+    if (savedGames) {
+      setUserGames(JSON.parse(savedGames));
+    }
+    
+    if (savedPosts) {
+      setForumPosts(JSON.parse(savedPosts));
+    }
+
     const updateOnlineCount = () => {
-      // Имитация онлайн пользователей (от 50 до 500)
       const baseCount = 127;
       const variation = Math.floor(Math.random() * 50) - 25;
       setOnlineCount(baseCount + variation);
     };
 
     updateOnlineCount();
-    const interval = setInterval(updateOnlineCount, 30000); // обновляем каждые 30 сек
-
+    const interval = setInterval(updateOnlineCount, 30000);
     return () => clearInterval(interval);
   }, []);
 
-  const games = [
-    {
-      id: 1,
-      title: "Блочное Приключение",
-      description: "Исследуй мир из кубиков и строй невероятные сооружения",
-      players: "2.1К играют",
-      rating: 4.8,
-      image: "/img/8a2b3c08-ca18-44e5-89d5-263e09e6bbb0.jpg"
-    },
-    {
-      id: 2,
-      title: "Космическая База",
-      description: "Создай свою космическую станцию среди звёзд",
-      players: "1.5К играют",
-      rating: 4.6,
-      image: "/img/8a2b3c08-ca18-44e5-89d5-263e09e6bbb0.jpg"
-    },
-    {
-      id: 3,
-      title: "Пиратские Сокровища",
-      description: "Ищи сокровища и сражайся с пиратами на море",
-      players: "987 играют",
-      rating: 4.7,
-      image: "/img/8a2b3c08-ca18-44e5-89d5-263e09e6bbb0.jpg"
+  // Сохранение в localStorage
+  useEffect(() => {
+    if (isLoggedIn && currentUser.username) {
+      localStorage.setItem('blox2009_user', JSON.stringify(currentUser));
+    } else {
+      localStorage.removeItem('blox2009_user');
     }
-  ];
+  }, [currentUser, isLoggedIn]);
+
+  useEffect(() => {
+    localStorage.setItem('blox2009_games', JSON.stringify(userGames));
+  }, [userGames]);
+
+  useEffect(() => {
+    localStorage.setItem('blox2009_posts', JSON.stringify(forumPosts));
+  }, [forumPosts]);
+
+  const games = [];
 
   const friends = [
     { name: "Игрок123", status: "online", game: "Блочное Приключение" },
@@ -121,7 +133,7 @@ export default function Index() {
                 <>
                   <Dialog open={showRegister} onOpenChange={setShowRegister}>
                     <DialogTrigger asChild>
-                      <Button variant="outline" size="sm" className="bg-white/90">
+                      <Button variant="outline" size="sm" className="bg-white border-gray-300">
                         <Icon name="UserPlus" size={16} className="mr-2" />
                         Регистрация
                       </Button>
@@ -181,6 +193,7 @@ export default function Index() {
                                 });
                                 setIsLoggedIn(true);
                                 setShowRegister(false);
+                                setRegisterForm({ username: '', email: '', password: '', confirmPassword: '' });
                               }
                             }}
                           >
@@ -194,9 +207,6 @@ export default function Index() {
                             Отмена
                           </Button>
                         </div>
-                        <p className="text-xs text-muted-foreground text-center">
-                          Регистрируясь, вы соглашаетесь с условиями использования BLOX2009
-                        </p>
                       </div>
                     </DialogContent>
                   </Dialog>
@@ -235,87 +245,7 @@ export default function Index() {
                   </Button>
                 </>
               )}
-              {isLoggedIn && (
-              <Dialog>
-                <DialogTrigger asChild>
-                  <Button size="sm">
-                    <Icon name="User" size={16} className="mr-2" />
-                    Аватар
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="max-w-md">
-                  <DialogHeader>
-                    <DialogTitle>Настройка Аватара</DialogTitle>
-                  </DialogHeader>
-                  <div className="space-y-6">
-                    <div className="flex justify-center">
-                      <div 
-                        className="w-32 h-40 rounded-lg border-4 border-white shadow-lg relative overflow-hidden"
-                        style={{ backgroundColor: avatarConfig.skinColor }}
-                      >
-                        <div 
-                          className="absolute top-8 left-4 right-4 h-12 rounded"
-                          style={{ backgroundColor: avatarConfig.shirtColor }}
-                        />
-                        <div 
-                          className="absolute top-20 left-4 right-4 bottom-4 rounded"
-                          style={{ backgroundColor: avatarConfig.pantsColor }}
-                        />
-                        {avatarConfig.hatType === 'cap' && (
-                          <div className="absolute top-2 left-6 right-6 h-6 bg-roblox-dark rounded-full" />
-                        )}
-                      </div>
-                    </div>
-                    
-                    <div className="space-y-4">
-                      <div>
-                        <label className="text-sm font-medium mb-2 block">Цвет кожи</label>
-                        <div className="flex gap-2">
-                          {['#FDB94E', '#D2691E', '#8B4513', '#FFE4B5'].map((color) => (
-                            <button
-                              key={color}
-                              className="w-8 h-8 rounded-full border-2 border-white shadow-md"
-                              style={{ backgroundColor: color }}
-                              onClick={() => setAvatarConfig(prev => ({ ...prev, skinColor: color }))}
-                            />
-                          ))}
-                        </div>
-                      </div>
-                      
-                      <div>
-                        <label className="text-sm font-medium mb-2 block">Цвет рубашки</label>
-                        <div className="flex gap-2">
-                          {['#00A2FF', '#2ECC40', '#FF6B6B', '#B10DC9'].map((color) => (
-                            <button
-                              key={color}
-                              className="w-8 h-8 rounded-full border-2 border-white shadow-md"
-                              style={{ backgroundColor: color }}
-                              onClick={() => setAvatarConfig(prev => ({ ...prev, shirtColor: color }))}
-                            />
-                          ))}
-                        </div>
-                      </div>
-                      
-                      <div>
-                        <label className="text-sm font-medium mb-2 block">Цвет штанов</label>
-                        <div className="flex gap-2">
-                          {['#2ECC40', '#4A90E2', '#8B4513', '#333333'].map((color) => (
-                            <button
-                              key={color}
-                              className="w-8 h-8 rounded-full border-2 border-white shadow-md"
-                              style={{ backgroundColor: color }}
-                              onClick={() => setAvatarConfig(prev => ({ ...prev, pantsColor: color }))}
-                            />
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                    
-                    <Button className="w-full">Сохранить Аватар</Button>
-                  </div>
-                </DialogContent>
-              </Dialog>
-              )}
+
             </div>
           </div>
         </div>
@@ -335,88 +265,54 @@ export default function Index() {
               </p>
             </div>
 
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              <Card className="bg-white border border-gray-200">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Icon name="Gamepad2" className="text-roblox-blue" />
-                    Популярные Игры
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    {games.slice(0, 3).map((game) => (
-                      <div key={game.id} className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 transition-colors">
-                        <img 
-                          src={game.image} 
-                          alt={game.title}
-                          className="w-12 h-12 rounded-lg object-cover"
-                        />
-                        <div className="flex-1 min-w-0">
-                          <h4 className="font-medium truncate">{game.title}</h4>
-                          <p className="text-sm text-gray-500">{game.players}</p>
-                        </div>
+            {userGames.length > 0 ? (
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {userGames.slice(0, 6).map((game, index) => (
+                  <Card key={index} className="bg-white border border-gray-200 hover:shadow-lg transition-shadow">
+                    <div className="aspect-video relative overflow-hidden rounded-t-lg bg-gray-100">
+                      <img 
+                        src={game.imageUrl || '/img/8a2b3c08-ca18-44e5-89d5-263e09e6bbb0.jpg'} 
+                        alt={game.title}
+                        className="w-full h-full object-cover"
+                      />
+                      <Badge className="absolute top-2 right-2 bg-green-500">
+                        ★ {game.rating || '5.0'}
+                      </Badge>
+                    </div>
+                    <CardHeader>
+                      <CardTitle className="text-lg">{game.title}</CardTitle>
+                      <p className="text-sm text-gray-600">{game.description}</p>
+                      {game.port && (
+                        <p className="text-xs text-roblox-blue font-mono bg-gray-100 px-2 py-1 rounded">
+                          Порт: {game.port}
+                        </p>
+                      )}
+                    </CardHeader>
+                    <CardContent>
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm text-gray-500">Автор: {game.author}</span>
+                        <Button size="sm" className="bg-roblox-blue hover:bg-roblox-blue/90">
+                          <Icon name="Play" size={14} className="mr-1" />
+                          Играть
+                        </Button>
                       </div>
-                    ))}
-                  </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            ) : (
+              <Card className="bg-white border border-gray-200 max-w-md mx-auto">
+                <CardContent className="p-8 text-center">
+                  <Icon name="GamepadIcon" size={48} className="text-gray-400 mx-auto mb-4" />
+                  <h3 className="text-xl font-semibold mb-2">Нет игр</h3>
+                  <p className="text-gray-600 mb-4">Стань первым, кто создаст игру!</p>
+                  <Button onClick={() => setActiveTab('создать')} className="bg-roblox-green hover:bg-roblox-green/90">
+                    <Icon name="Plus" size={16} className="mr-2" />
+                    Создать игру
+                  </Button>
                 </CardContent>
               </Card>
-
-              <Card className="bg-white border border-gray-200">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Icon name="Users" className="text-roblox-green" />
-                    Друзья Онлайн
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    {friends.filter(f => f.status !== 'offline').map((friend, index) => (
-                      <div key={index} className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-gradient-to-br from-roblox-blue to-roblox-purple rounded-full flex items-center justify-center text-white font-bold">
-                          {friend.name[0]}
-                        </div>
-                        <div className="flex-1">
-                          <h4 className="font-medium">{friend.name}</h4>
-                          <p className="text-sm text-gray-500">{friend.game}</p>
-                        </div>
-                        <Badge 
-                          variant={friend.status === 'online' ? 'default' : 'secondary'}
-                          className={friend.status === 'online' ? 'bg-green-500' : 'bg-yellow-500'}
-                        >
-                          {friend.status === 'online' ? 'Онлайн' : 'В игре'}
-                        </Badge>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card className="bg-white border border-gray-200">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Icon name="Activity" className="text-roblox-purple" />
-                    Статистика
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="text-center">
-                      <h4 className="font-semibold text-2xl text-roblox-blue">{onlineCount}</h4>
-                      <p className="text-sm text-gray-500">игроков онлайн</p>
-                    </div>
-                    <div className="text-center">
-                      <h4 className="font-semibold text-2xl text-roblox-green">{games.length + userGames.length}</h4>
-                      <p className="text-sm text-gray-500">всего игр</p>
-                    </div>
-                    <div className="text-center">
-                      <h4 className="font-semibold text-2xl text-roblox-yellow">{friends.length}</h4>
-                      <p className="text-sm text-gray-500">активных игроков</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
+            )}
           </TabsContent>
 
           {/* Games Tab */}
@@ -436,30 +332,30 @@ export default function Index() {
             </div>
 
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {[...games, ...userGames].map((game, index) => (
+              {userGames.map((game, index) => (
                 <Card key={game.id || index} className="bg-white border border-gray-200 hover:shadow-lg transition-shadow duration-200">
                   <div className="aspect-video relative overflow-hidden rounded-t-lg bg-gray-100">
                     <img 
-                      src={game.image || '/img/8a2b3c08-ca18-44e5-89d5-263e09e6bbb0.jpg'} 
+                      src={game.imageUrl || '/img/8a2b3c08-ca18-44e5-89d5-263e09e6bbb0.jpg'} 
                       alt={game.title}
                       className="w-full h-full object-cover"
                     />
                     <Badge className="absolute top-2 right-2 bg-green-500">
-                      ★ {game.rating || '4.5'}
+                      ★ {game.rating || '5.0'}
                     </Badge>
-                    {game.isUserGame && (
-                      <Badge className="absolute top-2 left-2 bg-roblox-purple">
-                        Моя игра
-                      </Badge>
-                    )}
                   </div>
                   <CardHeader>
                     <CardTitle className="text-lg">{game.title}</CardTitle>
                     <p className="text-sm text-gray-600">{game.description}</p>
+                    {game.port && (
+                      <p className="text-xs text-roblox-blue font-mono bg-gray-100 px-2 py-1 rounded">
+                        Порт: {game.port}
+                      </p>
+                    )}
                   </CardHeader>
                   <CardContent>
                     <div className="flex justify-between items-center">
-                      <span className="text-sm text-gray-500">{game.players || '0 играют'}</span>
+                      <span className="text-sm text-gray-500">Автор: {game.author}</span>
                       <Button className="bg-roblox-blue hover:bg-roblox-blue/90">
                         <Icon name="Play" size={16} className="mr-2" />
                         Играть
@@ -508,38 +404,54 @@ export default function Index() {
                         <Label htmlFor="gameTitle">Название игры</Label>
                         <Input
                           id="gameTitle"
-                          placeholder="Введите название игры"
+                          placeholder="Моя крутая игра"
                           value={newGameForm.title}
                           onChange={(e) => setNewGameForm(prev => ({...prev, title: e.target.value}))}
                         />
                       </div>
                       <div>
-                        <Label htmlFor="gameDesc">Описание</Label>
-                        <Input
+                        <Label htmlFor="gameDesc">Описание и порт</Label>
+                        <Textarea
                           id="gameDesc"
-                          placeholder="Кратко опишите вашу игру"
+                          placeholder="Опишите свою игру...\n\nПорт: 53640"
                           value={newGameForm.description}
                           onChange={(e) => setNewGameForm(prev => ({...prev, description: e.target.value}))}
+                          rows={4}
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="gameImage">Ссылка на картинку (необязательно)</Label>
+                        <Input
+                          id="gameImage"
+                          placeholder="https://example.com/image.jpg"
+                          value={newGameForm.imageUrl}
+                          onChange={(e) => setNewGameForm(prev => ({...prev, imageUrl: e.target.value}))}
                         />
                       </div>
                       <Button 
                         className="w-full bg-roblox-green hover:bg-roblox-green/90"
                         onClick={() => {
                           if (newGameForm.title && newGameForm.description) {
+                            // Оизвлекаем порт из описания
+                            const portMatch = newGameForm.description.match(/Порт:?\s*(\d+)/i);
+                            const port = portMatch ? portMatch[1] : '';
+                            
                             setUserGames(prev => [...prev, {
                               id: Date.now(),
                               title: newGameForm.title,
                               description: newGameForm.description,
-                              players: '0 играют',
+                              port: port,
+                              imageUrl: newGameForm.imageUrl,
+                              author: currentUser.username,
                               rating: 5.0,
-                              isUserGame: true
+                              createdAt: new Date().toISOString()
                             }]);
-                            setNewGameForm({ title: '', description: '' });
+                            setNewGameForm({ title: '', description: '', port: '', imageUrl: '' });
                           }
                         }}
                       >
                         <Icon name="Plus" size={16} className="mr-2" />
-                        Создать Игру
+                        Опубликовать Игру
                       </Button>
                     </CardContent>
                   </Card>
@@ -552,20 +464,24 @@ export default function Index() {
                       <CardContent>
                         <div className="space-y-3">
                           {userGames.map((game, index) => (
-                            <div key={index} className="flex items-center justify-between p-3 border border-gray-200 rounded-lg">
-                              <div>
-                                <h4 className="font-medium">{game.title}</h4>
-                                <p className="text-sm text-gray-500">{game.description}</p>
+                            <div key={index} className="flex items-start justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50">
+                              <div className="flex-1">
+                                <h4 className="font-medium text-lg">{game.title}</h4>
+                                <p className="text-sm text-gray-600 mt-1">{game.description.split('\n')[0]}</p>
+                                {game.port && (
+                                  <p className="text-xs text-roblox-blue font-mono bg-blue-50 px-2 py-1 rounded mt-2 inline-block">
+                                    Порт: {game.port}
+                                  </p>
+                                )}
+                                <p className="text-xs text-gray-400 mt-2">
+                                  Создано: {new Date(game.createdAt).toLocaleDateString('ru-RU')}
+                                </p>
                               </div>
-                              <div className="flex gap-2">
-                                <Button size="sm" variant="outline">
-                                  <Icon name="Edit" size={14} className="mr-1" />
-                                  Изменить
-                                </Button>
+                              <div className="flex gap-2 ml-4">
                                 <Button 
                                   size="sm" 
                                   variant="outline" 
-                                  className="text-red-600 hover:text-red-700"
+                                  className="text-red-600 hover:text-red-700 hover:border-red-300"
                                   onClick={() => setUserGames(prev => prev.filter((_, i) => i !== index))}
                                 >
                                   <Icon name="Trash2" size={14} />
@@ -648,28 +564,113 @@ export default function Index() {
           </TabsContent>
 
           <TabsContent value="форум" className="space-y-6">
-            <h2 className="text-3xl font-bold text-roblox-dark">Форум</h2>
-            <div className="grid gap-4">
-              {[
-                "Обновления и новости",
-                "Помощь новичкам",
-                "Обсуждение игр",
-                "Разработка игр"
-              ].map((topic, index) => (
-                <Card key={index} className="bg-white/95 backdrop-blur-sm">
-                  <CardContent className="p-6">
-                    <div className="flex items-center justify-between">
+            <div className="flex justify-between items-center">
+              <h2 className="text-3xl font-bold text-roblox-dark">Форум</h2>
+              {isLoggedIn && (
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <Button className="bg-roblox-blue hover:bg-roblox-blue/90">
+                      <Icon name="Plus" size={16} className="mr-2" />
+                      Новая тема
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="max-w-2xl">
+                    <DialogHeader>
+                      <DialogTitle>Новая тема на форуме</DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-4">
                       <div>
-                        <h3 className="font-semibold text-lg">{topic}</h3>
-                        <p className="text-muted-foreground">Последнее сообщение: сегодня</p>
+                        <Label htmlFor="postTitle">Заголовок</Label>
+                        <Input
+                          id="postTitle"
+                          placeholder="О чём хотите поговорить?"
+                          value={newPostForm.title}
+                          onChange={(e) => setNewPostForm(prev => ({...prev, title: e.target.value}))}
+                        />
                       </div>
-                      <Badge variant="secondary">
-                        {Math.floor(Math.random() * 100) + 1} тем
-                      </Badge>
+                      <div>
+                        <Label htmlFor="postContent">Сообщение</Label>
+                        <Textarea
+                          id="postContent"
+                          placeholder="Напишите своё сообщение..."
+                          value={newPostForm.content}
+                          onChange={(e) => setNewPostForm(prev => ({...prev, content: e.target.value}))}
+                          rows={6}
+                        />
+                      </div>
+                      <Button 
+                        className="w-full bg-roblox-green hover:bg-roblox-green/90"
+                        onClick={() => {
+                          if (newPostForm.title && newPostForm.content) {
+                            setForumPosts(prev => [{
+                              id: Date.now(),
+                              title: newPostForm.title,
+                              content: newPostForm.content,
+                              author: currentUser.username,
+                              createdAt: new Date().toISOString(),
+                              replies: 0
+                            }, ...prev]);
+                            setNewPostForm({ title: '', content: '' });
+                          }
+                        }}
+                      >
+                        <Icon name="Send" size={16} className="mr-2" />
+                        Опубликовать
+                      </Button>
                     </div>
+                  </DialogContent>
+                </Dialog>
+              )}
+            </div>
+            
+            <div className="grid gap-4">
+              {forumPosts.length > 0 ? (
+                forumPosts.map((post, index) => (
+                  <Card key={index} className="bg-white border border-gray-200 hover:shadow-md transition-shadow">
+                    <CardContent className="p-6">
+                      <div className="flex justify-between items-start mb-3">
+                        <div>
+                          <h3 className="font-semibold text-lg text-roblox-dark">{post.title}</h3>
+                          <p className="text-sm text-gray-500">
+                            Автор: {post.author} • {new Date(post.createdAt).toLocaleDateString('ru-RU')}
+                          </p>
+                        </div>
+                        <Badge variant="secondary">
+                          {post.replies} ответов
+                        </Badge>
+                      </div>
+                      <p className="text-gray-700 mb-4">{post.content}</p>
+                      <div className="flex gap-2">
+                        <Button size="sm" variant="outline">
+                          <Icon name="MessageCircle" size={14} className="mr-2" />
+                          Ответить
+                        </Button>
+                        {currentUser.username === post.author && (
+                          <Button 
+                            size="sm" 
+                            variant="outline" 
+                            className="text-red-600 hover:text-red-700"
+                            onClick={() => setForumPosts(prev => prev.filter((_, i) => i !== index))}
+                          >
+                            <Icon name="Trash2" size={14} />
+                          </Button>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))
+              ) : (
+                <Card className="bg-white border border-gray-200">
+                  <CardContent className="p-8 text-center">
+                    <Icon name="MessageSquare" size={48} className="text-gray-400 mx-auto mb-4" />
+                    <h3 className="text-xl font-semibold mb-2">Форум пуст</h3>
+                    <p className="text-gray-600 mb-4">Стань первым, кто начнёт обсуждение!</p>
+                    {!isLoggedIn && (
+                      <p className="text-sm text-gray-500">Войдите в аккаунт, чтобы создавать темы</p>
+                    )}
                   </CardContent>
                 </Card>
-              ))}
+              )}
             </div>
           </TabsContent>
         </Tabs>
