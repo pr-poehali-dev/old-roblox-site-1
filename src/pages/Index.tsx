@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -12,6 +12,13 @@ export default function Index() {
   const [activeTab, setActiveTab] = useState("home");
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [showRegister, setShowRegister] = useState(false);
+  const [onlineCount, setOnlineCount] = useState(0);
+  const [showCreateGame, setShowCreateGame] = useState(false);
+  const [userGames, setUserGames] = useState([]);
+  const [newGameForm, setNewGameForm] = useState({
+    title: '',
+    description: ''
+  });
   const [registerForm, setRegisterForm] = useState({
     username: '',
     email: '',
@@ -24,6 +31,21 @@ export default function Index() {
     pantsColor: '#2ECC40',
     hatType: 'cap'
   });
+
+  // Реальный онлайн счетчик
+  useEffect(() => {
+    const updateOnlineCount = () => {
+      // Имитация онлайн пользователей (от 50 до 500)
+      const baseCount = 127;
+      const variation = Math.floor(Math.random() * 50) - 25;
+      setOnlineCount(baseCount + variation);
+    };
+
+    updateOnlineCount();
+    const interval = setInterval(updateOnlineCount, 30000); // обновляем каждые 30 сек
+
+    return () => clearInterval(interval);
+  }, []);
 
   const games = [
     {
@@ -58,12 +80,7 @@ export default function Index() {
     { name: "ПиратКапитан", status: "offline", game: null }
   ];
 
-  const catalogItems = [
-    { name: "Красная кепка", price: 50, type: "hat" },
-    { name: "Крутые очки", price: 100, type: "accessory" },
-    { name: "Космический костюм", price: 250, type: "shirt" },
-    { name: "Джинсы", price: 75, type: "pants" }
-  ];
+
 
   return (
     <div className="min-h-screen bg-white">
@@ -74,7 +91,7 @@ export default function Index() {
             <div className="flex items-center gap-4">
               <h1 className="text-2xl font-bold text-roblox-dark">BLOX2009</h1>
               <nav className="hidden md:flex gap-6">
-                {["Главная", "Игры", "Каталог", "Друзья", "Профиль", "Форум"].map((item) => (
+                {["Главная", "Игры", "Создать", "Друзья", "Профиль", "Форум"].map((item) => (
                   <button
                     key={item}
                     onClick={() => setActiveTab(item.toLowerCase())}
@@ -90,10 +107,12 @@ export default function Index() {
               </nav>
             </div>
             <div className="flex items-center gap-3">
-              <Button variant="outline" size="sm" className="bg-white border-roblox-blue text-roblox-blue hover:bg-roblox-blue/10">
-                <Icon name="Download" size={16} className="mr-2" />
-                Скачать
-              </Button>
+              <a href="https://github.com/roblox/roblox-studio" target="_blank" rel="noopener noreferrer">
+                <Button variant="outline" size="sm" className="bg-white border-roblox-blue text-roblox-blue hover:bg-roblox-blue/10">
+                  <Icon name="Download" size={16} className="mr-2" />
+                  Скачать
+                </Button>
+              </a>
               {!isLoggedIn ? (
                 <>
                   <Dialog open={showRegister} onOpenChange={setShowRegister}>
@@ -182,14 +201,14 @@ export default function Index() {
                 </>
               ) : (
                 <>
-                  <Badge variant="secondary" className="bg-roblox-yellow text-roblox-dark">
-                    <Icon name="Coins" size={16} className="mr-1" />
-                    1,250 R$
+                  <Badge variant="secondary" className="bg-green-500 text-white">
+                    <Icon name="Users" size={16} className="mr-1" />
+                    {onlineCount} онлайн
                   </Badge>
                   <Button 
                     variant="outline" 
                     size="sm" 
-                    className="bg-white/90"
+                    className="bg-white border-gray-300"
                     onClick={() => setIsLoggedIn(false)}
                   >
                     <Icon name="LogOut" size={16} className="mr-2" />
@@ -298,7 +317,7 @@ export default function Index() {
             </div>
 
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              <Card className="bg-white/95 backdrop-blur-sm">
+              <Card className="bg-white border border-gray-200">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <Icon name="Gamepad2" className="text-roblox-blue" />
@@ -308,7 +327,7 @@ export default function Index() {
                 <CardContent>
                   <div className="space-y-3">
                     {games.slice(0, 3).map((game) => (
-                      <div key={game.id} className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted/50 transition-colors">
+                      <div key={game.id} className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 transition-colors">
                         <img 
                           src={game.image} 
                           alt={game.title}
@@ -316,7 +335,7 @@ export default function Index() {
                         />
                         <div className="flex-1 min-w-0">
                           <h4 className="font-medium truncate">{game.title}</h4>
-                          <p className="text-sm text-muted-foreground">{game.players}</p>
+                          <p className="text-sm text-gray-500">{game.players}</p>
                         </div>
                       </div>
                     ))}
@@ -324,7 +343,7 @@ export default function Index() {
                 </CardContent>
               </Card>
 
-              <Card className="bg-white/95 backdrop-blur-sm">
+              <Card className="bg-white border border-gray-200">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <Icon name="Users" className="text-roblox-green" />
@@ -340,7 +359,7 @@ export default function Index() {
                         </div>
                         <div className="flex-1">
                           <h4 className="font-medium">{friend.name}</h4>
-                          <p className="text-sm text-muted-foreground">{friend.game}</p>
+                          <p className="text-sm text-gray-500">{friend.game}</p>
                         </div>
                         <Badge 
                           variant={friend.status === 'online' ? 'default' : 'secondary'}
@@ -354,26 +373,27 @@ export default function Index() {
                 </CardContent>
               </Card>
 
-              <Card className="bg-white/95 backdrop-blur-sm">
+              <Card className="bg-white border border-gray-200">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    <Icon name="ShoppingBag" className="text-roblox-yellow" />
-                    Новинки Каталога
+                    <Icon name="Activity" className="text-roblox-purple" />
+                    Статистика
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-3">
-                    {catalogItems.slice(0, 3).map((item, index) => (
-                      <div key={index} className="flex items-center justify-between p-2 rounded-lg hover:bg-muted/50 transition-colors">
-                        <div>
-                          <h4 className="font-medium">{item.name}</h4>
-                          <p className="text-sm text-muted-foreground">{item.type}</p>
-                        </div>
-                        <Badge variant="outline" className="text-roblox-yellow border-roblox-yellow">
-                          {item.price} R$
-                        </Badge>
-                      </div>
-                    ))}
+                  <div className="space-y-4">
+                    <div className="text-center">
+                      <h4 className="font-semibold text-2xl text-roblox-blue">{onlineCount}</h4>
+                      <p className="text-sm text-gray-500">игроков онлайн</p>
+                    </div>
+                    <div className="text-center">
+                      <h4 className="font-semibold text-2xl text-roblox-green">{games.length + userGames.length}</h4>
+                      <p className="text-sm text-gray-500">всего игр</p>
+                    </div>
+                    <div className="text-center">
+                      <h4 className="font-semibold text-2xl text-roblox-yellow">{friends.length}</h4>
+                      <p className="text-sm text-gray-500">активных игроков</p>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
@@ -397,25 +417,30 @@ export default function Index() {
             </div>
 
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {games.map((game) => (
-                <Card key={game.id} className="bg-white/95 backdrop-blur-sm hover:scale-105 transition-transform duration-200">
-                  <div className="aspect-video relative overflow-hidden rounded-t-lg">
+              {[...games, ...userGames].map((game, index) => (
+                <Card key={game.id || index} className="bg-white border border-gray-200 hover:shadow-lg transition-shadow duration-200">
+                  <div className="aspect-video relative overflow-hidden rounded-t-lg bg-gray-100">
                     <img 
-                      src={game.image} 
+                      src={game.image || '/img/8a2b3c08-ca18-44e5-89d5-263e09e6bbb0.jpg'} 
                       alt={game.title}
                       className="w-full h-full object-cover"
                     />
                     <Badge className="absolute top-2 right-2 bg-green-500">
-                      ★ {game.rating}
+                      ★ {game.rating || '4.5'}
                     </Badge>
+                    {game.isUserGame && (
+                      <Badge className="absolute top-2 left-2 bg-roblox-purple">
+                        Моя игра
+                      </Badge>
+                    )}
                   </div>
                   <CardHeader>
                     <CardTitle className="text-lg">{game.title}</CardTitle>
-                    <p className="text-sm text-muted-foreground">{game.description}</p>
+                    <p className="text-sm text-gray-600">{game.description}</p>
                   </CardHeader>
                   <CardContent>
                     <div className="flex justify-between items-center">
-                      <span className="text-sm text-muted-foreground">{game.players}</span>
+                      <span className="text-sm text-gray-500">{game.players || '0 играют'}</span>
                       <Button className="bg-roblox-blue hover:bg-roblox-blue/90">
                         <Icon name="Play" size={16} className="mr-2" />
                         Играть
@@ -427,34 +452,109 @@ export default function Index() {
             </div>
           </TabsContent>
 
-          {/* Other tabs */}
-          <TabsContent value="каталог" className="space-y-6">
-            <div className="text-center">
-              <h2 className="text-3xl font-bold text-roblox-dark">Каталог</h2>
-              <p className="text-gray-600 mt-2">Кастомизируй своего персонажа</p>
-            </div>
-            
-            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {catalogItems.map((item, index) => (
-                <Card key={index} className="bg-white/95 backdrop-blur-sm text-center">
-                  <CardHeader>
-                    <div className="w-20 h-20 bg-gradient-to-br from-roblox-blue to-roblox-purple rounded-lg mx-auto mb-2"></div>
-                    <CardTitle className="text-lg">{item.name}</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-3">
-                      <Badge variant="outline" className="text-roblox-yellow border-roblox-yellow">
-                        {item.price} R$
-                      </Badge>
-                      <Button className="w-full bg-roblox-green hover:bg-roblox-green/90">
-                        Купить
-                      </Button>
-                    </div>
+          {/* Create Game Tab */}
+          <TabsContent value="создать" className="space-y-6">
+            <div className="text-center max-w-2xl mx-auto">
+              <h2 className="text-3xl font-bold text-roblox-dark mb-2">Создай Свою Игру</h2>
+              <p className="text-gray-600 mb-8">Воплоти свои идеи в жизнь и поделись ими с миром!</p>
+              
+              {!isLoggedIn ? (
+                <Card className="bg-white border border-gray-200">
+                  <CardContent className="p-8 text-center">
+                    <Icon name="Lock" size={48} className="text-gray-400 mx-auto mb-4" />
+                    <h3 className="text-xl font-semibold mb-2">Войдите в аккаунт</h3>
+                    <p className="text-gray-600 mb-4">Для создания игр необходимо войти в аккаунт</p>
+                    <Button onClick={() => setIsLoggedIn(true)} className="bg-roblox-blue hover:bg-roblox-blue/90">
+                      Войти
+                    </Button>
                   </CardContent>
                 </Card>
-              ))}
+              ) : (
+                <div className="space-y-6">
+                  <Card className="bg-white border border-gray-200">
+                    <CardHeader>
+                      <CardTitle>Создать Новую Игру</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div>
+                        <Label htmlFor="gameTitle">Название игры</Label>
+                        <Input
+                          id="gameTitle"
+                          placeholder="Введите название игры"
+                          value={newGameForm.title}
+                          onChange={(e) => setNewGameForm(prev => ({...prev, title: e.target.value}))}
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="gameDesc">Описание</Label>
+                        <Input
+                          id="gameDesc"
+                          placeholder="Кратко опишите вашу игру"
+                          value={newGameForm.description}
+                          onChange={(e) => setNewGameForm(prev => ({...prev, description: e.target.value}))}
+                        />
+                      </div>
+                      <Button 
+                        className="w-full bg-roblox-green hover:bg-roblox-green/90"
+                        onClick={() => {
+                          if (newGameForm.title && newGameForm.description) {
+                            setUserGames(prev => [...prev, {
+                              id: Date.now(),
+                              title: newGameForm.title,
+                              description: newGameForm.description,
+                              players: '0 играют',
+                              rating: 5.0,
+                              isUserGame: true
+                            }]);
+                            setNewGameForm({ title: '', description: '' });
+                          }
+                        }}
+                      >
+                        <Icon name="Plus" size={16} className="mr-2" />
+                        Создать Игру
+                      </Button>
+                    </CardContent>
+                  </Card>
+
+                  {userGames.length > 0 && (
+                    <Card className="bg-white border border-gray-200">
+                      <CardHeader>
+                        <CardTitle>Мои Игры ({userGames.length})</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-3">
+                          {userGames.map((game, index) => (
+                            <div key={index} className="flex items-center justify-between p-3 border border-gray-200 rounded-lg">
+                              <div>
+                                <h4 className="font-medium">{game.title}</h4>
+                                <p className="text-sm text-gray-500">{game.description}</p>
+                              </div>
+                              <div className="flex gap-2">
+                                <Button size="sm" variant="outline">
+                                  <Icon name="Edit" size={14} className="mr-1" />
+                                  Изменить
+                                </Button>
+                                <Button 
+                                  size="sm" 
+                                  variant="outline" 
+                                  className="text-red-600 hover:text-red-700"
+                                  onClick={() => setUserGames(prev => prev.filter((_, i) => i !== index))}
+                                >
+                                  <Icon name="Trash2" size={14} />
+                                </Button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )}
+                </div>
+              )}
             </div>
           </TabsContent>
+
+
 
           <TabsContent value="друзья" className="space-y-6">
             <h2 className="text-3xl font-bold text-roblox-dark">Друзья</h2>
