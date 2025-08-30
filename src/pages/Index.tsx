@@ -4,10 +4,20 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import Icon from '@/components/ui/icon';
 
 export default function Index() {
   const [activeTab, setActiveTab] = useState("home");
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [showRegister, setShowRegister] = useState(false);
+  const [registerForm, setRegisterForm] = useState({
+    username: '',
+    email: '',
+    password: '',
+    confirmPassword: ''
+  });
   const [avatarConfig, setAvatarConfig] = useState({
     skinColor: '#FDB94E',
     shirtColor: '#00A2FF',
@@ -62,7 +72,7 @@ export default function Index() {
         <div className="container mx-auto px-4 py-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <h1 className="text-2xl font-bold text-roblox-dark">ROBLOX</h1>
+              <h1 className="text-2xl font-bold text-roblox-dark">BLOX2009</h1>
               <nav className="hidden md:flex gap-6">
                 {["Главная", "Игры", "Каталог", "Друзья", "Профиль", "Форум"].map((item) => (
                   <button
@@ -80,10 +90,110 @@ export default function Index() {
               </nav>
             </div>
             <div className="flex items-center gap-3">
-              <Badge variant="secondary" className="bg-roblox-yellow text-roblox-dark">
-                <Icon name="Coins" size={16} className="mr-1" />
-                1,250 R$
-              </Badge>
+              {!isLoggedIn ? (
+                <>
+                  <Dialog open={showRegister} onOpenChange={setShowRegister}>
+                    <DialogTrigger asChild>
+                      <Button variant="outline" size="sm" className="bg-white/90">
+                        <Icon name="UserPlus" size={16} className="mr-2" />
+                        Регистрация
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="max-w-md">
+                      <DialogHeader>
+                        <DialogTitle>Добро пожаловать в BLOX2009!</DialogTitle>
+                      </DialogHeader>
+                      <div className="space-y-4">
+                        <div className="space-y-2">
+                          <Label htmlFor="username">Имя пользователя</Label>
+                          <Input
+                            id="username"
+                            placeholder="Введите имя пользователя"
+                            value={registerForm.username}
+                            onChange={(e) => setRegisterForm(prev => ({...prev, username: e.target.value}))}
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="email">Email</Label>
+                          <Input
+                            id="email"
+                            type="email"
+                            placeholder="Введите email"
+                            value={registerForm.email}
+                            onChange={(e) => setRegisterForm(prev => ({...prev, email: e.target.value}))}
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="password">Пароль</Label>
+                          <Input
+                            id="password"
+                            type="password"
+                            placeholder="Введите пароль"
+                            value={registerForm.password}
+                            onChange={(e) => setRegisterForm(prev => ({...prev, password: e.target.value}))}
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="confirmPassword">Подтвердите пароль</Label>
+                          <Input
+                            id="confirmPassword"
+                            type="password"
+                            placeholder="Повторите пароль"
+                            value={registerForm.confirmPassword}
+                            onChange={(e) => setRegisterForm(prev => ({...prev, confirmPassword: e.target.value}))}
+                          />
+                        </div>
+                        <div className="flex gap-2">
+                          <Button 
+                            className="flex-1 bg-roblox-blue hover:bg-roblox-blue/90"
+                            onClick={() => {
+                              setIsLoggedIn(true);
+                              setShowRegister(false);
+                            }}
+                          >
+                            Создать аккаунт
+                          </Button>
+                          <Button 
+                            variant="outline" 
+                            className="flex-1"
+                            onClick={() => setShowRegister(false)}
+                          >
+                            Отмена
+                          </Button>
+                        </div>
+                        <p className="text-xs text-muted-foreground text-center">
+                          Регистрируясь, вы соглашаетесь с условиями использования BLOX2009
+                        </p>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
+                  <Button 
+                    size="sm" 
+                    className="bg-roblox-green hover:bg-roblox-green/90"
+                    onClick={() => setIsLoggedIn(true)}
+                  >
+                    <Icon name="LogIn" size={16} className="mr-2" />
+                    Войти
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Badge variant="secondary" className="bg-roblox-yellow text-roblox-dark">
+                    <Icon name="Coins" size={16} className="mr-1" />
+                    1,250 R$
+                  </Badge>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="bg-white/90"
+                    onClick={() => setIsLoggedIn(false)}
+                  >
+                    <Icon name="LogOut" size={16} className="mr-2" />
+                    Выйти
+                  </Button>
+                </>
+              )}
+              {isLoggedIn && (
               <Dialog>
                 <DialogTrigger asChild>
                   <Button size="sm">
@@ -163,6 +273,7 @@ export default function Index() {
                   </div>
                 </DialogContent>
               </Dialog>
+              )}
             </div>
           </div>
         </div>
@@ -175,10 +286,10 @@ export default function Index() {
           <TabsContent value="главная" className="space-y-6">
             <div className="text-center space-y-4 mb-8">
               <h2 className="text-4xl font-bold text-white drop-shadow-lg">
-                Добро пожаловать в ROBLOX!
+                Добро пожаловать в BLOX2009!
               </h2>
               <p className="text-xl text-white/90 drop-shadow">
-                Играй, создавай, исследуй безграничные миры
+                {isLoggedIn ? 'Играй, создавай, исследуй безграничные миры' : 'Зарегистрируйся и начни своё приключение!'}
               </p>
             </div>
 
